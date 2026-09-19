@@ -246,9 +246,31 @@ def dashboard():
     body = render_template_string("""
     <h1>Painel</h1>
     <div class="grid">
-      <div class="card"><div class="stat">{{total}}</div>Produtos</div>
-      <div class="card"><div class="stat">{{estoque}}</div>Itens em estoque</div>
-      <div class="card low"><div class="stat">{{baixos}}</div>Estoque baixo</div>
+  <div class="card">
+    <div class="stat">{{total}}</div>
+    Produtos
+  </div>
+
+  <div class="card">
+    <div class="stat">{{estoque}}</div>
+    Itens em estoque
+  </div>
+
+  <div class="card low">
+    <div class="stat">{{baixos}}</div>
+    Estoque baixo
+  </div>
+
+  <div class="card" style="background:#ffe5e5">
+    <div class="stat">{{vencidos}}</div>
+    🔴 Produtos vencidos
+  </div>
+
+  <div class="card" style="background:#fff2d9">
+    <div class="stat">{{vencendo}}</div>
+    🟠 Vencendo em até 30 dias
+  </div>
+</div>
     </div>
     <div class="card">
       <h3>Últimas movimentações</h3>
