@@ -298,7 +298,7 @@ def product_new():
     nome,codigo_barras,setor_id,unidade,estoque,estoque_minimo,custo,preco_venda,data_validade
 )
 VALUES(
-    %s,NULLIF(%s,''),%s,%s,%s,%s,%s,%s,NULLIF(%s,'')
+    %s,NULLIF(%s,''),%s,%s,%s,%s,%s,%s,CAST(NULLIF(%s,'') AS DATE)
 )""",
 (
     f["nome"].strip(),
@@ -332,7 +332,7 @@ def product_edit(pid):
   estoque_minimo=%s,
   custo=%s,
   preco_venda=%s,
-  data_validade=NULLIF(%s,''),
+  data_validade=CAST(NULLIF(%s,'') AS DATE),
   atualizado_em=NOW()
 WHERE id=%s""",
 (
