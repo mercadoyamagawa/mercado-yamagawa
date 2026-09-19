@@ -248,8 +248,16 @@ def products():
     {% for p in rows %}
     <tr class="{{'low' if p.estoque <= p.estoque_minimo else ''}}">
       <td>{{p.nome}}</td><td>{{p.setor}}</td><td>{{p.codigo_barras or ''}}</td>
-      <td>{{p.estoque}} {{p.unidade}}</td><td>{{p.estoque_minimo}}</td>
-      <td class="actions"><a class="btn" href="{{url_for('product_edit',pid=p.id)}}">Editar</a>
+      <td>{{p.estoque}} {{p.unidade}}</td>
+<td>{{p.estoque_minimo}}</td>
+<td>
+{% if p.data_validade %}
+{{ p.data_validade.strftime('%d/%m/%Y') }}
+{% else %}
+—
+{% endif %}
+</td>
+<td class="actions">
       <a class="btn" href="{{url_for('movement')}}?produto={{p.id}}">Movimentar</a></td>
     </tr>{% endfor %}
     </table></div>
