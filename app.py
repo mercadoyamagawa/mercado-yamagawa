@@ -258,7 +258,9 @@ def products():
 {% endif %}
 </td>
 <td class="actions">
-      <a class="btn" href="{{url_for('movement')}}?produto={{p.id}}">Movimentar</a></td>
+  <a class="btn" href="{{url_for('product_edit',pid=p.id)}}">Editar</a>
+  <a class="btn" href="{{url_for('movement')}}?produto={{p.id}}">Movimentar</a>
+</td>
     </tr>{% endfor %}
     </table></div>
     """, rows=rows,q=q)
