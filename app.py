@@ -482,7 +482,67 @@ def movement():
     with db() as conn:
 
         if request.method == "POST":
-            # código do POST aqui
+
+            pid = int(request.form["produto_id"])
+            tipo = request.form["tipo"]
+            qtd = float(request.form["quantidade"])
+
+            with conn.cursor() as cur:
+
+                cur.execute(
+                    "SELECT estoque FROM produtos WHERE id=%s FOR UPDATE",
+                    (pid,)
+                )
+
+                p = cur.fetchone()
+
+                if not p:
+                    flash("Produto não encontrado.")
+                else:
+
+                    old = float(p["estoque"])
+
+                    if tipo == "entrada":
+                        new = old + qtd
+                    elif tipo == "saida":
+                        new = old - qtd
+                    else:
+                        new = qtd
+
+                    if new < 0:
+                        flash("A saída não pode deixar o estoque negativo.")
+                    else:
+
+                        cur.execute(
+                            "UPDATE produtos SET estoque=%s, atualizado_em=NOW() WHERE id=%s",
+                            (new, pid)
+                        )
+
+                        cur.execute("""
+                            INSERT INTO movimentacoes(
+                                produto_id,
+                                usuario_id,
+                                tipo,
+                                quantidade,
+                                estoque_anterior,
+                                estoque_posterior,
+                                observacao
+                            )
+                            VALUES(%s,%s,%s,%s,%s,%s,%s)
+                        """, (
+                            pid,
+                            session["uid"],
+                            tipo,
+                            qtd,
+                            old,
+                            new,
+                            request.form.get("observacao","")
+                        ))
+
+                        conn.commit()
+
+                        flash("Movimentação registrada.")
+                        return redirect(url_for("movement"))
 
         produtos = conn.execute("""
             SELECT
@@ -497,8 +557,171 @@ def movement():
         """).fetchall()
 
     body = render_template_string("""
-    ... HTML COMPLETO DA TELA ...
-    """, produtos=produtos)
+<h1>Movimentar Estoque</h1>
+
+<div class="card">
+<form method="post">
+
+<label>Código de barras</label><br>
+
+<input id="barcode"
+       placeholder="Digite ou leia o código"
+       style="width:70%">
+
+<button type="button" onclick="localizarManual()">
+Buscar
+</button>
+
+<button type="button" onclick="scan()">
+📷 Ler Código
+</button>
+
+<br><br>
+
+<label>Produto</label><br>
+
+<select id="produto"
+        name="produto_id"
+        required
+        style="width:100%">
+
+{% for p in produtos %}
+<option value="{{p.id}}"
+        data-barcode="{{p.codigo_barras or ''}}">
+    {{p.nome}}
+</option>
+{% endfor %}
+
+</select>
+
+<br><br>
+
+<label>Tipo</label><br>
+
+<select name="tipo">
+    <option value="entrada">Entrada</option>
+    <option value="saida">Saída</option>
+</select>
+
+<br><br>
+
+<label>Quantidade</label><br>
+
+<input type="number"
+       step="0.001"
+       min="0.001"
+       name="quantidade"
+       required>
+
+<br><br>
+
+<button type="submit">Salvar</button>
+
+</form>
+</div>
+
+<script>
+
+function localizarProduto(codigo){
+
+    codigo = codigo.trim();
+
+    const select = document.getElementById("produto");
+
+    for(let i=0;i<select.options.length;i++){
+
+        const barcode =
+            (select.options[i].dataset.barcode || '').trim();
+
+        if(barcode === codigo){
+
+            select.selectedIndex = i;
+
+            return true;
+        }
+    }
+
+    alert("Produto não encontrado.");
+    return false;
+}
+
+function localizarManual(){
+
+    const codigo =
+        document.getElementById("barcode").value;
+
+    localizarProduto(codigo);
+}
+
+async function scan(){
+
+    if(!('BarcodeDetector' in window)){
+        alert('Seu navegador não suporta leitura de código.');
+        return;
+    }
+
+    try{
+
+        const detector = new BarcodeDetector();
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                video:{facingMode:{ideal:'environment'}}
+            });
+
+        const video = document.createElement('video');
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        const box = document.createElement('div');
+
+        box.style =
+        'position:fixed;inset:10%;background:white;z-index:9999;padding:20px';
+
+        box.appendChild(video);
+
+        document.body.appendChild(box);
+
+        const timer = setInterval(async()=>{
+
+            const codes = await detector.detect(video);
+
+            if(codes.length){
+
+                const codigo = codes[0].rawValue;
+
+                document.getElementById("barcode").value = codigo;
+
+                localizarProduto(codigo);
+
+                clearInterval(timer);
+
+                stream.getTracks().forEach(t=>t.stop());
+
+                box.remove();
+            }
+
+        },300);
+
+        box.onclick = ()=>{
+
+            clearInterval(timer);
+
+            stream.getTracks().forEach(t=>t.stop());
+
+            box.remove();
+        };
+
+    }catch(e){
+
+        alert("Erro ao abrir câmera.");
+    }
+}
+
+</script>
+""", produtos=produtos)
 
     return page("Movimentar", body)
     
