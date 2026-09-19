@@ -128,6 +128,13 @@ input,select,button{padding:10px;margin:4px 0;border:1px solid #bbb;border-radiu
 button,.btn{background:#174a7e;color:#fff;border:0;padding:10px 14px;text-decoration:none;display:inline-block;border-radius:7px}
 .danger{background:#a52a2a}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .stat{font-size:28px;font-weight:bold}.low{background:#fff0f0}
+.vencido{
+    background:#ffd6d6 !important;
+}
+
+.vencendo{
+    background:#ffe7bf !important;
+}
 table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left}
 .flash{padding:10px;border-radius:7px;background:#fff4cc;margin-bottom:10px}
 .actions a{margin-right:5px}.small{font-size:13px;color:#666}
