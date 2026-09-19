@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from functools import wraps
 
 from flask import Flask, request, redirect, url_for, session, render_template_string, flash, Response
@@ -297,33 +297,15 @@ def products():
           WHERE p.ativo AND (%s='' OR p.nome ILIKE '%%'||%s||'%%' OR COALESCE(p.codigo_barras,'') ILIKE '%%'||%s||'%%')
           ORDER BY p.nome""",(q,q,q)).fetchall()
     body = render_template_string("""
-    <h1>Produtos</h1>
-    <div class="card">
-      <form><input name="q" value="{{q}}" placeholder="Buscar por nome ou código de barras">
-      <button>Buscar</button> <a class="btn" href="{{url_for('product_new')}}">+ Novo produto</a></form>
-    </div>
-    <div class="card"><table>
-    <tr><th>Produto</th><th>Setor</th><th>Código</th><th>Estoque</th><th>Mínimo</th><th>Validade</th><th>Ações</th></tr>
-    {% for p in rows %}
-    <tr class="{{'low' if p.estoque <= p.estoque_minimo else ''}}">
-      <td>{{p.nome}}</td><td>{{p.setor}}</td><td>{{p.codigo_barras or ''}}</td>
-      <td>{{p.estoque}} {{p.unidade}}</td>
-<td>{{p.estoque_minimo}}</td>
-<td>
-{% if p.data_validade %}
-{{ p.data_validade.strftime('%d/%m/%Y') }}
-{% else %}
-—
-{% endif %}
-</td>
-<td class="actions">
-  <a class="btn" href="{{url_for('product_edit',pid=p.id)}}">Editar</a>
-  <a class="btn" href="{{url_for('movement')}}?produto={{p.id}}">Movimentar</a>
-</td>
-    </tr>{% endfor %}
-    </table></div>
-    """, rows=rows,q=q)
-    return page("Produtos", body)
+...
+""",
+rows=rows,
+q=q,
+date=date,
+timedelta=timedelta
+)
+
+return page("Produtos", body)
 
 FORM = """
 <h1>{{titulo}}</h1>
