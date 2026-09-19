@@ -207,12 +207,42 @@ def logout():
 @login_required
 def dashboard():
     with db() as conn:
-        total = conn.execute("SELECT COUNT(*) c FROM produtos WHERE ativo").fetchone()["c"]
-        estoque = conn.execute("SELECT COALESCE(SUM(estoque),0) s FROM produtos WHERE ativo").fetchone()["s"]
-        baixos = conn.execute("SELECT COUNT(*) c FROM produtos WHERE ativo AND estoque <= estoque_minimo").fetchone()["c"]
-        recentes = conn.execute("""SELECT p.nome,m.tipo,m.quantidade,m.criado_em
-          FROM movimentacoes m JOIN produtos p ON p.id=m.produto_id
-          ORDER BY m.criado_em DESC LIMIT 8""").fetchall()
+    total = conn.execute(
+        "SELECT COUNT(*) c FROM produtos WHERE ativo"
+    ).fetchone()["c"]
+
+    estoque = conn.execute(
+        "SELECT COALESCE(SUM(estoque),0) s FROM produtos WHERE ativo"
+    ).fetchone()["s"]
+
+    baixos = conn.execute(
+        "SELECT COUNT(*) c FROM produtos WHERE ativo AND estoque <= estoque_minimo"
+    ).fetchone()["c"]
+
+    vencidos = conn.execute("""
+        SELECT COUNT(*) c
+        FROM produtos
+        WHERE ativo
+          AND data_validade IS NOT NULL
+          AND data_validade < CURRENT_DATE
+    """).fetchone()["c"]
+
+    vencendo = conn.execute("""
+        SELECT COUNT(*) c
+        FROM produtos
+        WHERE ativo
+          AND data_validade IS NOT NULL
+          AND data_validade >= CURRENT_DATE
+          AND data_validade <= CURRENT_DATE + INTERVAL '30 days'
+    """).fetchone()["c"]
+
+    recentes = conn.execute("""
+        SELECT p.nome,m.tipo,m.quantidade,m.criado_em
+        FROM movimentacoes m
+        JOIN produtos p ON p.id=m.produto_id
+        ORDER BY m.criado_em DESC
+        LIMIT 8
+    """).fetchall()
     body = render_template_string("""
     <h1>Painel</h1>
     <div class="grid">
