@@ -482,68 +482,7 @@ def movement():
     with db() as conn:
 
         if request.method == "POST":
-
-            pid = int(request.form["produto_id"])
-            tipo = request.form["tipo"]
-            qtd = float(request.form["quantidade"])
-
-            with conn.cursor() as cur:
-
-                cur.execute(
-                    "SELECT estoque FROM produtos WHERE id=%s FOR UPDATE",
-                    (pid,)
-                )
-
-                p = cur.fetchone()
-
-                if not p:
-                    flash("Produto não encontrado.")
-
-                else:
-
-                    old = float(p["estoque"])
-
-                    if tipo == "entrada":
-                        new = old + qtd
-                    elif tipo == "saida":
-                        new = old - qtd
-                    else:
-                        new = qtd
-
-                    if new < 0:
-                        flash("A saída não pode deixar o estoque negativo.")
-                    else:
-
-                        cur.execute(
-                            "UPDATE produtos SET estoque=%s, atualizado_em=NOW() WHERE id=%s",
-                            (new, pid)
-                        )
-
-                        cur.execute("""
-                            INSERT INTO movimentacoes(
-                                produto_id,
-                                usuario_id,
-                                tipo,
-                                quantidade,
-                                estoque_anterior,
-                                estoque_posterior,
-                                observacao
-                            )
-                            VALUES(%s,%s,%s,%s,%s,%s,%s)
-                        """, (
-                            pid,
-                            session["uid"],
-                            tipo,
-                            qtd,
-                            old,
-                            new,
-                            request.form.get("observacao", "")
-                        ))
-
-                        conn.commit()
-
-                        flash("Movimentação registrada.")
-                        return redirect(url_for("movement"))
+            # código do POST aqui
 
         produtos = conn.execute("""
             SELECT
@@ -557,10 +496,8 @@ def movement():
             ORDER BY nome
         """).fetchall()
 
-    selected = request.args.get("produto", "")
-
     body = render_template_string("""
-    SEU HTML AQUI
+    ... HTML COMPLETO DA TELA ...
     """, produtos=produtos)
 
     return page("Movimentar", body)
