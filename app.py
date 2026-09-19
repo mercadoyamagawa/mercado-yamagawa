@@ -185,7 +185,7 @@ def login():
         flash("Usuário ou senha inválidos.")
     body = """
     <div class="card" style="max-width:420px;margin:60px auto;text-align:center">
-      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mercado Yamagawa" class="login-logo">
+      <img src="/static/logo.jpg" alt="Mercado Yamagawa" class="login-logo">
       <h2>Mercado YAMAGAWA</h2>
       <p>Controle de estoque online</p>
       <form method="post">
