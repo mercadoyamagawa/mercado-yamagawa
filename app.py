@@ -294,9 +294,23 @@ def product_new():
     if request.method=="POST":
         f=request.form
         with db() as conn:
-            conn.execute("""INSERT INTO produtos(nome,codigo_barras,setor_id,unidade,estoque,estoque_minimo,custo,preco_venda)
-              VALUES(%s,NULLIF(%s,''),%s,%s,%s,%s,%s,%s)""",
-              (f["nome"].strip(),f.get("codigo_barras","").strip(),f["setor_id"],f.get("unidade","un"),f["estoque"],f["estoque_minimo"],f["custo"],f["preco_venda"]))
+            conn.execute("""INSERT INTO produtos(
+    nome,codigo_barras,setor_id,unidade,estoque,estoque_minimo,custo,preco_venda,data_validade
+)
+VALUES(
+    %s,NULLIF(%s,''),%s,%s,%s,%s,%s,%s,NULLIF(%s,'')
+)""",
+(
+    f["nome"].strip(),
+    f.get("codigo_barras","").strip(),
+    f["setor_id"],
+    f.get("unidade","un"),
+    f["estoque"],
+    f["estoque_minimo"],
+    f["custo"],
+    f["preco_venda"],
+    f.get("data_validade","")
+))
             conn.commit()
         flash("Produto cadastrado.")
         return redirect(url_for("products"))
@@ -309,9 +323,30 @@ def product_edit(pid):
     with db() as conn:
         if request.method=="POST":
             f=request.form
-            conn.execute("""UPDATE produtos SET nome=%s,codigo_barras=NULLIF(%s,''),setor_id=%s,unidade=%s,
-              estoque=%s,estoque_minimo=%s,custo=%s,preco_venda=%s,atualizado_em=NOW() WHERE id=%s""",
-              (f["nome"].strip(),f.get("codigo_barras","").strip(),f["setor_id"],f.get("unidade","un"),f["estoque"],f["estoque_minimo"],f["custo"],f["preco_venda"],pid))
+            conn.execute("""UPDATE produtos SET
+  nome=%s,
+  codigo_barras=NULLIF(%s,''),
+  setor_id=%s,
+  unidade=%s,
+  estoque=%s,
+  estoque_minimo=%s,
+  custo=%s,
+  preco_venda=%s,
+  data_validade=NULLIF(%s,''),
+  atualizado_em=NOW()
+WHERE id=%s""",
+(
+  f["nome"].strip(),
+  f.get("codigo_barras","").strip(),
+  f["setor_id"],
+  f.get("unidade","un"),
+  f["estoque"],
+  f["estoque_minimo"],
+  f["custo"],
+  f["preco_venda"],
+  f.get("data_validade",""),
+  pid
+))
             conn.commit(); flash("Produto atualizado."); return redirect(url_for("products"))
         p=conn.execute("SELECT * FROM produtos WHERE id=%s",(pid,)).fetchone()
         setores=conn.execute("SELECT * FROM setores WHERE ativo ORDER BY nome").fetchall()
