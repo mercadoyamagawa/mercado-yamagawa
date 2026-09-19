@@ -479,6 +479,12 @@ WHERE id=%s""",
 @login_required
 def movement():
     with db() as conn:
+        produtos = conn.execute("""
+            SELECT id,nome,codigo_barras
+            FROM produtos
+            WHERE ativo
+            ORDER BY nome
+""").fetchall()
         if request.method=="POST":
             pid=int(request.form["produto_id"]); tipo=request.form["tipo"]; qtd=float(request.form["quantidade"])
             with conn.cursor() as cur:
