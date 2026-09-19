@@ -269,6 +269,7 @@ FORM = """
 <label>Estoque mínimo<br><input type="number" step="0.001" min="0" name="estoque_minimo" value="{{p.estoque_minimo if p else 0}}"></label><br>
 <label>Custo<br><input type="number" step="0.01" min="0" name="custo" value="{{p.custo if p else 0}}"></label><br>
 <label>Preço de venda<br><input type="number" step="0.01" min="0" name="preco_venda" value="{{p.preco_venda if p else 0}}"></label><br>
+<label>Data de validade<br><input type="date" name="data_validade" value="{{p.data_validade if p and p.data_validade else ''}}"></label><br>
 <button>Salvar</button> <a class="btn" href="{{url_for('products')}}">Cancelar</a>
 </form></div>
 <script>
