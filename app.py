@@ -478,18 +478,29 @@ WHERE id=%s""",
 @app.route("/movimentar", methods=["GET","POST"])
 @login_required
 def movement():
+
     with db() as conn:
- produtos=conn.execute("""
-    SELECT
-        id,
-        nome,
-        codigo_barras,
-        estoque,
-        unidade
-    FROM produtos
-    WHERE ativo
-    ORDER BY nome
-""").fetchall()
+
+        if request.method == "POST":
+            pid = int(request.form["produto_id"])
+            # restante do POST...
+
+        produtos = conn.execute("""
+            SELECT
+                id,
+                nome,
+                codigo_barras,
+                estoque,
+                unidade
+            FROM produtos
+            WHERE ativo
+            ORDER BY nome
+        """).fetchall()
+
+    selected = request.args.get("produto","")
+
+    body = render_template_string(...)
+    return page("Movimentar", body)
         if request.method=="POST":
             pid=int(request.form["produto_id"]); tipo=request.form["tipo"]; qtd=float(request.form["quantidade"])
             with conn.cursor() as cur:
