@@ -312,7 +312,7 @@ date=date,
 timedelta=timedelta
 )
 
-return page("Produtos", body)
+    return page("Produtos", body)
 
 FORM = """
 <h1>{{titulo}}</h1>
