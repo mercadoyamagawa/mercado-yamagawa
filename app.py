@@ -77,6 +77,7 @@ def init_db():
     with db() as conn:
         with conn.cursor() as cur:
             cur.execute(SCHEMA)
+            cur.execute("ALTER TABLE produtos ADD COLUMN IF NOT EXISTS data_validade DATE")
             cur.execute("INSERT INTO setores (nome) VALUES ('Alimentos'), ('Limpeza') ON CONFLICT DO NOTHING")
             admin_user = os.environ.get("ADMIN_USERNAME", "admin").strip()
             admin_pass = os.environ.get("ADMIN_PASSWORD", "admin123").strip()
