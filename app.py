@@ -278,7 +278,14 @@ def dashboard():
       {% for r in recentes %}<tr><td>{{r.nome}}</td><td>{{r.tipo}}</td><td>{{r.quantidade}}</td><td>{{r.criado_em.strftime('%d/%m/%Y %H:%M')}}</td></tr>{% endfor %}
       </table>
     </div>
-    """, total=total, estoque=estoque, baixos=baixos, recentes=recentes)
+    """,
+total=total,
+estoque=estoque,
+baixos=baixos,
+vencidos=vencidos,
+vencendo=vencendo,
+recentes=recentes
+)
     return page("Painel", body)
 
 @app.route("/produtos")
