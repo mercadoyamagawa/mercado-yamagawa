@@ -479,7 +479,7 @@ WHERE id=%s""",
 @login_required
 def movement():
     with db() as conn:
-        produtos=conn.execute("""
+ produtos=conn.execute("""
     SELECT
         id,
         nome,
