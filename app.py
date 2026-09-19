@@ -498,13 +498,124 @@ def movement():
                         conn.commit(); flash("Movimentação registrada."); return redirect(url_for("movement"))
         produtos=conn.execute("SELECT id,nome,estoque,unidade FROM produtos WHERE ativo ORDER BY nome").fetchall()
     selected=request.args.get("produto","")
-    body=render_template_string("""
-    <h1>Movimentar estoque</h1><div class="card"><form method="post">
-    <label>Produto<br><select name="produto_id" required style="width:95%">{% for p in produtos %}<option value="{{p.id}}" {% if selected|string==p.id|string %}selected{% endif %}>{{p.nome}} — {{p.estoque}} {{p.unidade}}</option>{% endfor %}</select></label><br>
-    <label>Tipo<br><select name="tipo"><option value="entrada">Entrada</option><option value="saida">Saída</option><option value="ajuste">Ajuste</option></select></label><br>
-    <label>Quantidade<br><input type="number" name="quantidade" step="0.001" min="0.001" required></label><br>
-    <label>Observação<br><input name="observacao" style="width:95%"></label><br>
-    <button>Registrar</button></form></div>""",produtos=produtos,selected=selected)
+    body = render_template_string("""
+<h1>Movimentar Estoque</h1>
+
+<div class="card">
+<form method="post">
+
+<label>Produto</label><br>
+
+<input id="barcode" placeholder="Código de barras" style="width:70%">
+<button type="button" onclick="scan()">📷 Ler Código</button>
+
+<br><br>
+
+<select id="produto" name="produto_id" required style="width:100%">
+{% for p in produtos %}
+<option value="{{p.id}}" data-barcode="{{p.codigo_barras or ''}}">
+    {{p.nome}}
+</option>
+{% endfor %}
+</select>
+
+<br><br>
+
+<label>Tipo</label><br>
+<select name="tipo">
+    <option value="entrada">Entrada</option>
+    <option value="saida">Saída</option>
+</select>
+
+<br><br>
+
+<label>Quantidade</label><br>
+<input type="number" step="0.001" min="0.001"
+       name="quantidade" required>
+
+<br><br>
+
+<button type="submit">Salvar</button>
+
+</form>
+</div>
+
+<script>
+
+function localizarProduto(codigo){
+    const select = document.getElementById("produto");
+
+    for(let i=0;i<select.options.length;i++){
+        if(select.options[i].dataset.barcode === codigo){
+            select.selectedIndex = i;
+            return true;
+        }
+    }
+
+    alert("Produto não encontrado.");
+    return false;
+}
+
+async function scan(){
+
+    if(!('BarcodeDetector' in window)){
+        alert('Seu navegador não suporta leitura de código.');
+        return;
+    }
+
+    try{
+
+        const detector = new BarcodeDetector();
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video:{ facingMode:{ ideal:'environment' } }
+        });
+
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.setAttribute('playsinline','');
+        await video.play();
+
+        const box = document.createElement('div');
+        box.style =
+        'position:fixed;inset:10%;background:white;z-index:9999;padding:20px';
+
+        box.appendChild(video);
+        document.body.appendChild(box);
+
+        const timer = setInterval(async()=>{
+
+            const codes = await detector.detect(video);
+
+            if(codes.length){
+
+                const codigo = codes[0].rawValue;
+
+                document.getElementById('barcode').value = codigo;
+
+                localizarProduto(codigo);
+
+                clearInterval(timer);
+
+                stream.getTracks().forEach(t=>t.stop());
+
+                box.remove();
+            }
+
+        },300);
+
+        box.onclick = ()=>{
+            clearInterval(timer);
+            stream.getTracks().forEach(t=>t.stop());
+            box.remove();
+        };
+
+    }catch(e){
+        alert('Erro ao abrir câmera.');
+    }
+}
+</script>
+""", produtos=produtos)
     return page("Movimentar",body)
 
 @app.route("/historico")
