@@ -244,7 +244,7 @@ def products():
       <button>Buscar</button> <a class="btn" href="{{url_for('product_new')}}">+ Novo produto</a></form>
     </div>
     <div class="card"><table>
-    <tr><th>Produto</th><th>Setor</th><th>Código</th><th>Estoque</th><th>Mínimo</th><th>Ações</th></tr>
+    <tr><th>Produto</th><th>Setor</th><th>Código</th><th>Estoque</th><th>Mínimo</th><th>Validade</th><th>Ações</th></tr>
     {% for p in rows %}
     <tr class="{{'low' if p.estoque <= p.estoque_minimo else ''}}">
       <td>{{p.nome}}</td><td>{{p.setor}}</td><td>{{p.codigo_barras or ''}}</td>
